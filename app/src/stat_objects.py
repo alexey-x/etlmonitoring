@@ -17,11 +17,13 @@ from app.src.adapters import (
 CSS_TABLE_ID = "stat_report"
 PILOT_COMM_ROTAION_NO_DATA_MSG = "Нет данных по сегменту PILOT_COMM_ROTATION"
 
+
 #  These statuses must correlate with CSS from email_base.j2 template
 class DataStatus(enum.StrEnum):
     SUCSESS = "sucsess"
     FAILURE = "failure"
     ERROR = "error"
+
 
 def select_alter_score_tables_with_max_date(tables: list[str]) -> list[str]:
     """
@@ -40,6 +42,7 @@ def select_alter_score_tables_with_max_date(tables: list[str]) -> list[str]:
         return []
     return [t for t in tables if max_date in t]
 
+
 def select_alter_score_table_names(engine: TypeEngine) -> list[str]:
     """Get the most recent tables from the list SCORE_MODEL_RESULTS_ALTER_YYYYMMDDhhmmss_[1,2,3, ...]"""
     query = sqlalchemy.sql.text("""
@@ -48,8 +51,7 @@ def select_alter_score_table_names(engine: TypeEngine) -> list[str]:
     from INFORMATION_SCHEMA.TABLES
     where TABLE_NAME like 'SCORE_MODEL_RESULTS_ALTER_2%'
     order by TABLE_NAME desc
-    """
-    )
+    """)
     with engine.connect() as conn:
         cursor = conn.execute(query)
         result = cursor.fetchall()
@@ -57,7 +59,12 @@ def select_alter_score_table_names(engine: TypeEngine) -> list[str]:
 
 
 class StatData:
-    def __init__(self, name: str, data: pd.DataFrame = pd.DataFrame(), data_status: str | None = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        data: pd.DataFrame = pd.DataFrame(),
+        data_status: str | None = None,
+    ) -> None:
         self.data_name = name
         self.data_table = self.convert_to_html_table(data)
         self.data_status = data_status
@@ -72,17 +79,18 @@ class StatData:
                 df[col] = df[col].apply(lambda x: f"{int(x):,d}".replace(",", " "))
 
         return df.to_html(index=False, table_id=CSS_TABLE_ID, na_rep="")
-    
+
     def __repr__(self) -> str:
         return f"""
         {self.data_name}
         {self.data_table}
         """
 
+
 class StatObject(abc.ABC):
     @abc.abstractmethod
-    def get_stat(self) -> StatData:
-        ...
+    def get_stat(self) -> StatData: ...
+
 
 class StatScoresMO(StatObject):
     database = "modb"
@@ -96,14 +104,14 @@ class StatScoresMO(StatObject):
     def get_stat(self) -> StatData:
         with self.engine.connect() as conn:
             df = pd.read_sql_query(self.query, conn)
-        
+
         return StatData(name=self.data_name, data=df)
 
 
 class StatLTVMO(StatObject):
     database = "modb"
     sql = "stat_StatLTVMO.sql"
-    data_name = "Статистика LTV в MODB" 
+    data_name = "Статистика LTV в MODB"
 
     def __init__(self) -> None:
         self.engine = get_connect_db(self.database, get_settings())
@@ -112,14 +120,17 @@ class StatLTVMO(StatObject):
     def get_stat(self) -> StatData:
         with self.engine.connect() as conn:
             df = pd.read_sql_query(self.query, conn)
-        
+
         return StatData(name=self.data_name, data=df)
+
 
 class StatScoresAlterMO(StatObject):
     _REPLACE = "$ALTER_SCORES$"
     database = "modb"
-    sql = "stat_StatScoresAlterMO.sql" # IMPORTANT! - the same _REPLACE pattern must be inside sql template
-    data_name = f"Статистика альтернативных скорров загруженных в MODB в таблицу {_REPLACE}"
+    sql = "stat_StatScoresAlterMO.sql"  # IMPORTANT! - the same _REPLACE pattern must be inside sql template
+    data_name = (
+        f"Статистика альтернативных скорров загруженных в MODB в таблицу {_REPLACE}"
+    )
 
     def __init__(self) -> None:
         self.engine = get_connect_db(self.database, get_settings())
@@ -132,14 +143,18 @@ class StatScoresAlterMO(StatObject):
         Unioned statistics should go in the first place.
         """
         alter_scores_tables = select_alter_score_table_names(self.engine)
-        alter_scores_tables = select_alter_score_tables_with_max_date(alter_scores_tables)
+        alter_scores_tables = select_alter_score_tables_with_max_date(
+            alter_scores_tables
+        )
         if not alter_scores_tables:
             return []
 
-        all_stat = [] 
+        all_stat = []
         with self.engine.connect() as conn:
             # let the statistics for all score tables goes first
-            df = pd.read_sql_query(self._make_query_to_all_tables(alter_scores_tables), conn)
+            df = pd.read_sql_query(
+                self._make_query_to_all_tables(alter_scores_tables), conn
+            )
             all_stat.append(StatData(name=self._get_data_name_total(), data=df))
 
             # calc statistcs for every score table
@@ -151,14 +166,14 @@ class StatScoresAlterMO(StatObject):
 
     def _get_query(self, table: str) -> str:
         return self.query.replace(self._REPLACE, table)
-    
+
     def _get_data_name(self, table: str) -> str:
         return self.data_name.replace(self._REPLACE, table)
-    
+
     def _get_data_name_total(self):
         """Returns table name for the summed (unioned) alter scores"""
         return "Суммарная статистика альтернативных скорров загруженных в MODB"
-    
+
     def _make_query_to_all_tables(self, all_tables: list[str]) -> str:
         query = [f"select * from {table} " for table in all_tables]
         query = "union all\n".join(query)
@@ -168,7 +183,7 @@ class StatScoresAlterMO(StatObject):
 
 class StatScoresStage(StatObject):
     database = "stage"
-    sql = "stat_StatScoresStage.sql" 
+    sql = "stat_StatScoresStage.sql"
     data_name = "Статистика скорров загруженных в STAGE"
 
     def __init__(self) -> None:
@@ -178,13 +193,13 @@ class StatScoresStage(StatObject):
     def get_stat(self) -> StatData:
         with self.engine.connect() as conn:
             df = pd.read_sql_query(self.query, conn)
-        
+
         return StatData(name=self.data_name, data=df)
 
 
 class StatLTVStage(StatObject):
     database = "stage"
-    sql = "stat_StatLTVStage.sql" 
+    sql = "stat_StatLTVStage.sql"
     data_name = "Статистика LTV загруженных в STAGE"
 
     def __init__(self) -> None:
@@ -194,12 +209,13 @@ class StatLTVStage(StatObject):
     def get_stat(self) -> StatData:
         with self.engine.connect() as conn:
             df = pd.read_sql_query(self.query, conn)
-        
+
         return StatData(name=self.data_name, data=df)
+
 
 class StatScoresAlterStage(StatObject):
     database = "stage"
-    sql = "stat_StatScoresAlterStage.sql" 
+    sql = "stat_StatScoresAlterStage.sql"
     data_name = "Статистика альтернативных скорров загруженных в STAGE"
 
     def __init__(self) -> None:
@@ -209,19 +225,19 @@ class StatScoresAlterStage(StatObject):
     def get_stat(self) -> StatData:
         with self.engine.connect() as conn:
             df = pd.read_sql_query(self.query, conn)
-        
+
         return StatData(name=self.data_name, data=df)
 
 
 class StatPilotCommRotationStage(StatObject):
     database = "stage"
-    sql = "stat_StatPilotCommRotationStage.sql" 
+    sql = "stat_StatPilotCommRotationStage.sql"
     data_name = {
         DataStatus.SUCSESS: "Завершилась загрузка сегмента PILOT_COMM_ROTATION из Хадуп в STAGE CRM",
         DataStatus.FAILURE: (
             "Завершилась загрузка сегмента PILOT_COMM_ROTATION из Хадуп в STAGE CRM с разными датами."
             f"Ожидаемая дата {datetime.datetime.today().date()}"
-            )
+        ),
     }
 
     def __init__(self) -> None:
@@ -234,9 +250,13 @@ class StatPilotCommRotationStage(StatObject):
             df = pd.read_sql_query(self.query, conn)
 
         self.set_data_status(df)
-        
-        return StatData(name=self.data_name[self.data_status], data=df, data_status=str(self.data_status))
-    
+
+        return StatData(
+            name=self.data_name[self.data_status],
+            data=df,
+            data_status=str(self.data_status),
+        )
+
     def set_data_status(self, data: pd.DataFrame) -> None:
         if data.empty:
             self.data_status = DataStatus.FAILURE
@@ -247,16 +267,17 @@ class StatPilotCommRotationStage(StatObject):
             self.data_status = DataStatus.SUCSESS
         else:
             self.data_status = DataStatus.FAILURE
-    
+
+
 class StatPilotCommRotationACRM(StatObject):
     database = "stage"
-    sql = "stat_StatPilotCommRotationACRM.sql" 
+    sql = "stat_StatPilotCommRotationACRM.sql"
     data_name = {
         DataStatus.SUCSESS: "Завершилась загрузка сегмента PILOT_COMM_ROTATION из STAGE CRM (P4MS) в МА (P1MS)",
         DataStatus.FAILURE: (
             "Завершилась загрузка сегмента PILOT_COMM_ROTATION из STAGE CRM (P4MS) в МА (P1MS) c разными датами."
             f"Ожидаемая дата {datetime.datetime.today().date()}"
-            )
+        ),
     }
 
     def __init__(self) -> None:
@@ -267,10 +288,14 @@ class StatPilotCommRotationACRM(StatObject):
     def get_stat(self) -> StatData:
         with self.engine.connect() as conn:
             df = pd.read_sql_query(self.query, conn)
-        
+
         self.set_data_status(df)
-        
-        return StatData(name=self.data_name[self.data_status], data=df, data_status=str(self.data_status))
+
+        return StatData(
+            name=self.data_name[self.data_status],
+            data=df,
+            data_status=str(self.data_status),
+        )
 
     def set_data_status(self, data: pd.DataFrame) -> None:
         if data.empty:
@@ -284,7 +309,6 @@ class StatPilotCommRotationACRM(StatObject):
             self.data_status = DataStatus.FAILURE
 
 
-
 # See table ETL_HDP.LOAD_CALENDAR columns PROJECT and STATUS
 # For each of the projects ('MO_MONTHLY_ALTER',  'MO_LTV', 'MO_MONTHLY')
 # calculate statistics when STATUS in (SAS_COMPLETE, STAGE_COMPLETE)
@@ -295,8 +319,8 @@ STAT_OBJECTS = {
     ("MO_MONTHLY", "STAGE_COMPLETE"): StatScoresStage(),
     ("MO_LTV", "STAGE_COMPLETE"): StatLTVStage(),
     ("MO_MONTHLY_ALTER", "STAGE_COMPLETE"): StatScoresAlterStage(),
-    ("CMDM_BRT",  "STAGE_COMPLETE"): StatPilotCommRotationStage(),
-    ("CMDM_BRT",  "SAS_COMPLETE"): StatPilotCommRotationACRM(),
+    ("CMDM_BRT", "STAGE_COMPLETE"): StatPilotCommRotationStage(),
+    ("CMDM_BRT", "SAS_COMPLETE"): StatPilotCommRotationACRM(),
     # ("add", "here"): OtherObjects() from other tables and databases
 }
 
@@ -317,8 +341,7 @@ def calc_stat(stat_obj_keys: list[tuple[str, str]]) -> list[StatData]:
             stat.append(_obj_stat)
         except Exception:
             notify_admin(
-                event=f"CALC STAT DATA ERROR {key}", 
-                data=traceback.format_exc()
+                event=f"CALC STAT DATA ERROR {key}", data=traceback.format_exc()
             )
             stat.append(StatData(name=f"{_obj.data_name} не рассчитана"))
 

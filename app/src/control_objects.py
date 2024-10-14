@@ -17,7 +17,7 @@ from app.src.model import (
     TabScenario,
     TabMOOffersAgg,
     TabMOSegments,
-    TabETLHDP_LoadCalendar
+    TabETLHDP_LoadCalendar,
 )
 
 from app.src.stat_objects import calc_stat
@@ -38,7 +38,7 @@ class ControlObject(abc.ABC):
 class SegmentMODB(ControlObject):
     event = "Новые сегменты загружены в MODB"
     database = "modb"
-    sql = "co_SegmentMODB.sql" 
+    sql = "co_SegmentMODB.sql"
     model = TabMOSegments
     message_template = "email_co_SegmentMODB.j2"
     run_on_schedule = schedule.every(5).minutes.do  # ref to function
@@ -46,18 +46,19 @@ class SegmentMODB(ControlObject):
     def __init__(self) -> None:
         self.engine = get_connect_db(self.database, get_settings())
         self.query = get_sql_query(self.sql)
-    
+
     def get_data(self) -> list[TabMOSegments]:
         with get_session(self.engine) as session:
             return session.query(self.model).from_statement(text(self.query)).all()
-        
+
     def process_data(self, data: set[TabMOSegments]) -> None:
         message_param = {
             "event": self.event,
-            "data":  data,
-            "stat": calc_stat(stat_obj_keys=[])
-        }        
+            "data": data,
+            "stat": calc_stat(stat_obj_keys=[]),
+        }
         notify(message_param, self.message_template, Role.USER)
+
 
 class MOOffersAgg(ControlObject):
     event = "Новые строки в INTEGRATION.MO_OFFERS БД MODB"
@@ -74,13 +75,13 @@ class MOOffersAgg(ControlObject):
     def get_data(self) -> list[TabMOOffersAgg]:
         with get_session(self.engine) as session:
             return session.query(self.model).from_statement(text(self.query)).all()
-        
+
     def process_data(self, data: set[TabMOOffersAgg]) -> None:
         message_param = {
             "event": self.event,
-            "data":  data,
-            "stat": calc_stat(stat_obj_keys=[])
-        }        
+            "data": data,
+            "stat": calc_stat(stat_obj_keys=[]),
+        }
         notify(message_param, self.message_template, Role.USER)
 
 
@@ -92,7 +93,6 @@ class ScenarioMODB(ControlObject):
     message_template = "email_co_ScenarioMODB.j2"
     run_on_schedule = schedule.every(5).minutes.do
 
-
     def __init__(self) -> None:
         self.engine = get_connect_db(self.database, get_settings())
         self.query = get_sql_query(self.sql)
@@ -100,13 +100,13 @@ class ScenarioMODB(ControlObject):
     def get_data(self) -> list[TabScenario]:
         with get_session(self.engine) as session:
             return session.query(self.model).from_statement(text(self.query)).all()
-        
+
     def process_data(self, data: set[TabScenario]) -> None:
         message_param = {
             "event": self.event,
-            "data":  data,
-            "stat": calc_stat(stat_obj_keys=[])
-        }        
+            "data": data,
+            "stat": calc_stat(stat_obj_keys=[]),
+        }
         notify(message_param, self.message_template, Role.USER)
 
 
@@ -125,18 +125,18 @@ class ScoreAltScoreLTV(ControlObject):
     def get_data(self) -> list[TabETLHDP_LoadCalendar]:
         with get_session(self.engine) as session:
             return session.query(self.model).from_statement(text(self.query)).all()
-        
+
     def process_data(self, data: set[TabETLHDP_LoadCalendar]) -> None:
         """
-        stat_obj_keys - list of keys to calculate some statistics. 
+        stat_obj_keys - list of keys to calculate some statistics.
         The keys must be in the stat_objects.STAT_OBJECTS dictionary or nothing will be calculated.
         """
         stat_obj_keys = [(row.project, row.status) for row in data]
         message_param = {
             "event": self.event,
-            "data":  data,
-            "stat": calc_stat(stat_obj_keys)
-        }        
+            "data": data,
+            "stat": calc_stat(stat_obj_keys),
+        }
         notify(message_param, self.message_template, Role.USER)
 
 
@@ -155,18 +155,18 @@ class SegmentPilotCommRotation(ControlObject):
     def get_data(self) -> list[TabETLHDP_LoadCalendar]:
         with get_session(self.engine) as session:
             return session.query(self.model).from_statement(text(self.query)).all()
-        
+
     def process_data(self, data: set[TabETLHDP_LoadCalendar]) -> None:
         """
-        stat_obj_keys - list of keys to calculate some statistics. 
+        stat_obj_keys - list of keys to calculate some statistics.
         The keys must be in the stat_objects.STAT_OBJECTS dictionary or nothing will be calculated.
         """
         stat_obj_keys = [(row.project, row.status) for row in data]
         message_param = {
             "event": self.event,
-            "data":  data,
-            "stat": calc_stat(stat_obj_keys)
-        }        
+            "data": data,
+            "stat": calc_stat(stat_obj_keys),
+        }
         notify(message_param, self.message_template, Role.USER)
 
 
@@ -185,14 +185,11 @@ class SegmentToMO(ControlObject):
     def get_data(self) -> list[TabETLHDP_LoadCalendar]:
         with get_session(self.engine) as session:
             return session.query(self.model).from_statement(text(self.query)).all()
-        
+
     def process_data(self, data: set[TabETLHDP_LoadCalendar]) -> None:
-        message_param = {
-            "event": self.event,
-            "data":  data,
-            "stat": calc_stat([])
-        }        
+        message_param = {"event": self.event, "data": data, "stat": calc_stat([])}
         notify(message_param, self.message_template, Role.USER)
+
 
 class RotationToMO(ControlObject):
     event = "ROTATION_TO_MO"
@@ -209,14 +206,11 @@ class RotationToMO(ControlObject):
     def get_data(self) -> list[TabETLHDP_LoadCalendar]:
         with get_session(self.engine) as session:
             return session.query(self.model).from_statement(text(self.query)).all()
-        
+
     def process_data(self, data: set[TabETLHDP_LoadCalendar]) -> None:
-        message_param = {
-            "event": self.event,
-            "data":  data,
-            "stat": calc_stat([])
-        }        
+        message_param = {"event": self.event, "data": data, "stat": calc_stat([])}
         notify(message_param, self.message_template, Role.USER)
+
 
 class ResultsMOToMA(ControlObject):
     event = "RESULTS_MO_TO_MA"
@@ -233,11 +227,7 @@ class ResultsMOToMA(ControlObject):
     def get_data(self) -> list[TabETLHDP_LoadCalendar]:
         with get_session(self.engine) as session:
             return session.query(self.model).from_statement(text(self.query)).all()
-        
+
     def process_data(self, data: set[TabETLHDP_LoadCalendar]) -> None:
-        message_param = {
-            "event": self.event,
-            "data":  data,
-            "stat": calc_stat([])
-        }        
+        message_param = {"event": self.event, "data": data, "stat": calc_stat([])}
         notify(message_param, self.message_template, Role.USER)
