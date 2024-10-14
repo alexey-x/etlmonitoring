@@ -3,10 +3,12 @@ from sqlalchemy import Column, Integer, String, DateTime, Date
 
 Base = declarative_base()
 
+
 class TabMAProcessLoadStatus(Base):
     """It seems with the switch to Airflow this class is not needed anymore. TOBE removed!!!"""
-    __tablename__ = "MA_PROCESS_LOAD_STATUS" # acrmsas.CDM.MA_PROCESS_LOAD_STATUS
-    #__table_args__ = {"schema": "CDM"}
+
+    __tablename__ = "MA_PROCESS_LOAD_STATUS"  # acrmsas.CDM.MA_PROCESS_LOAD_STATUS
+    # __table_args__ = {"schema": "CDM"}
 
     process_name = Column(String(128))
     log_dttm = Column(DateTime)
@@ -30,20 +32,22 @@ class TabMAProcessLoadStatus(Base):
             load_id = {self.load_id!r}
         ]
         """
-    
+
     def __eq__(self, other) -> bool:
-        return  isinstance(other, type(self)) \
-            and self.process_name == other.process_name \
-            and self.load_id == other.load_id \
+        return (
+            isinstance(other, type(self))
+            and self.process_name == other.process_name
+            and self.load_id == other.load_id
             and self.status == other.status
-    
+        )
+
     def __hash__(self) -> int:
         return hash((self.process_name, self.load_id, self.status))
 
 
 class TabScenario(Base):
-    __tablename__ = "SCENARIO"   # modb.MO_DATA.SCENARIO
-    #__table_args__ = {"schema": "MO_DATA"} 
+    __tablename__ = "SCENARIO"  # modb.MO_DATA.SCENARIO
+    # __table_args__ = {"schema": "MO_DATA"}
 
     scenario_id = Column(Integer, primary_key=True)
     scenario_nm = Column(String(128))
@@ -77,18 +81,19 @@ class TabScenario(Base):
 
     def __repr__(self) -> str:
         return f"Scenario(scenario_id = {self.scenario_id!r}, scenario_nm = {self.scenario_nm!r})"
-    
+
     def __eq__(self, other) -> bool:
-        return  isinstance(other, type(self)) and self.scenario_id == other.scenario_id
-    
+        return isinstance(other, type(self)) and self.scenario_id == other.scenario_id
+
     def __hash__(self) -> int:
         return hash(self.scenario_id)
 
 
 class TabMOOffersAgg(Base):
     """Agregated MO_OFFERS (see proper query) in sql folder."""
-    __tablename__ = "MO_OFFERS"   # modb.INTEGRATION.MO_OFFERS
-    #__table_args__ = {"schema": "INTGERATION"} 
+
+    __tablename__ = "MO_OFFERS"  # modb.INTEGRATION.MO_OFFERS
+    # __table_args__ = {"schema": "INTGERATION"}
 
     segment_cd = Column(String(128), primary_key=True)
     status = Column(String(30), primary_key=True)
@@ -106,19 +111,24 @@ class TabMOOffersAgg(Base):
             updated_dttm = {self.updated_dttm!r}
         ]
         """
-    
+
     def __eq__(self, other) -> bool:
-        return  isinstance(other, type(self)) \
-            and self.segment_cd == other.segment_cd \
-            and self.status == other.status \
-            and self.created_dttm == other.created_dttm \
+        return (
+            isinstance(other, type(self))
+            and self.segment_cd == other.segment_cd
+            and self.status == other.status
+            and self.created_dttm == other.created_dttm
             and self.updated_dttm == other.updated_dttm
-    
+        )
+
     def __hash__(self) -> int:
-        return hash((self.segment_cd, self.status, self.created_dttm, self.updated_dttm))
+        return hash(
+            (self.segment_cd, self.status, self.created_dttm, self.updated_dttm)
+        )
+
 
 class TabMOSegments(Base):
-    __tablename__ = "MO_SEGMENTS"   # modb.INTEGRATION.MO_SEGMENTS
+    __tablename__ = "MO_SEGMENTS"  # modb.INTEGRATION.MO_SEGMENTS
     # __table_args__ = {"schema": "INTGERATION"}
 
     segment_cd = Column(String(128), primary_key=True)
@@ -127,16 +137,17 @@ class TabMOSegments(Base):
 
     def __repr__(self) -> str:
         return f"Segment(segment_cd = {self.segment_cd!r})"
-    
+
     def __eq__(self, other) -> bool:
-        return  isinstance(other, type(self)) and self.segment_cd == other.segment_cd
-    
+        return isinstance(other, type(self)) and self.segment_cd == other.segment_cd
+
     def __hash__(self) -> int:
         return hash(self.segment_cd)
 
+
 class TabETLHDP_LoadCalendar(Base):
-    __tablename__ = "LOAD_CALENDAR" # acrmsas.ETL_HDP.LOAD_CALENDAR
-    #__table_args__ = {"schema": "CDM"}
+    __tablename__ = "LOAD_CALENDAR"  # acrmsas.ETL_HDP.LOAD_CALENDAR
+    # __table_args__ = {"schema": "CDM"}
 
     f_id = Column(Integer, primary_key=True)
     dt = Column(Date)
@@ -156,13 +167,15 @@ class TabETLHDP_LoadCalendar(Base):
             f_id = {self.f_id!r}
         ]
         """
-    
+
     def __eq__(self, other) -> bool:
-        return  isinstance(other, type(self)) \
-            and self.project == other.project \
-            and self.f_id == other.f_id \
-            and self.status == other.status \
+        return (
+            isinstance(other, type(self))
+            and self.project == other.project
+            and self.f_id == other.f_id
+            and self.status == other.status
             and self.dttm == other.dttm
-    
+        )
+
     def __hash__(self) -> int:
         return hash((self.project, self.f_id, self.status, self.dttm))
