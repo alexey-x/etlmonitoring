@@ -1,0 +1,46 @@
+{% extends "email_base.j2" %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<h1>ETL - мониторинг:</h1>
+
+<h2 id="inprogress">{{event}}</h2>
+
+<p>
+Отслеживаем появление новых сегментов в MO_OFFERS, а также
+изменение статусов или количества строк в существующих сегментах.
+</p>
+
+
+{% if data %}
+{% for row in data %}
+<table>
+    <tr><th> Сегмент </th> <td> {{row.segment_cd}} </td></tr>
+    <tr><th> Статус </th> <td> {{row.status}} </td></tr>
+    <tr><th> Кол-во строк </th> <td> {{row.num_offers}} </td></tr>
+    <tr><th> Дата создания сегмента </th><td> {{row.created_dttm}} </td> </tr>
+    <tr><th> Дата обновления сегмента </th><td> {{row.updated_dttm}} </td> </tr>
+</table>
+{% endfor %}
+{% endif %}
+
+<h2 id="inprogress"> Описание статусов </h2>
+<ul>
+    <li>NEW - новые предложения загружаются из aCRM в MODB в таблицу INTEGRATION.MO_OFFERS</li>
+    <li>PROCESSING - идет процесс выгрузки результатов оптимизации из MODB в aCRM </li>
+    <li>SUCCESS - результаты оптимизации заканчивают выгружаться из MODB в aCRM</li>
+    <li>EXPORTED - результаты оптимизации выгружены из MODB в aCRM </li>
+</ul>
+
+
+
+{% if stat %}
+<h2> 
+{{stat.data_name}}
+</h2>
+
+{{stat.data_table}}
+{% endif %}
+
+{% endblock %}

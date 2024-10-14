@@ -1,0 +1,15 @@
+{% extends "email_base.j2" %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<h1>ETL - мониторинг (ошибка):</h1>
+
+<h2 id="error">{{event}}</h2>
+
+{% if data %}
+<p>{{data}}</p>
+{% endif %}
+
+
+{% endblock %}

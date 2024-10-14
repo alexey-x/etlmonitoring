@@ -1,0 +1,31 @@
+{
+    "use_passive_node": false,
+    "modb": {
+        "driver": "ODBC",
+        "server": "S1",
+        "database": "db1",
+        "username": "u1",
+        "password": "add pass"
+    },
+    "acrm": {
+        "driver": "ODBC",
+        "server": "S2",
+        "database": "db2",
+        "username": "u2",
+        "password": "add pass"
+    },
+    "stage": {
+        "driver": "ODBC",
+        "server": "S3",
+        "database": "bd3",
+        "username": "u2",
+        "password": "add pass"
+    },
+    "email": {
+        "server": "E$",
+        "port": 25,
+        "domen": "a.ru",
+        "username": "a",
+        "password": "add pass"
+    }
+}

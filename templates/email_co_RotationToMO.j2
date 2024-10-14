@@ -1,0 +1,46 @@
+{% extends "email_base.j2" %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<h1>ETL - мониторинг:</h1>
+
+<h2>{{event}}</h2>
+
+{% if data %}
+{% for row in data %}
+
+<table>
+    <tr><th>f_id </th><td> {{row.f_id}} </td></tr>
+    <tr><th>dt </th><td> {{row.dt}} </td></tr>
+    <tr><th>dttm </th><td> {{row.dttm}} </td></tr>
+    <tr><th>project</th><td> {{row.project}} </td></tr>
+    <tr><th>status</th><td> {{row.status}} </td></tr>
+    <tr><th>description</th><td> {{row.description}} </td></tr>
+    <tr><th>load_type </th><td> {{row.load_type}} </td></tr>
+    <tr><th>CDTTM </th><td> {{row.cdttm}} </td></tr>
+</table>
+  
+{% endfor %}
+{% endif %}
+
+
+<h2> Описание статусов </h2>
+<ul>
+    <li>STAGE_PROCESSING - Началась загрузка из Хадуп в STAGE CRM</li>
+    <li>STAGE_COMPLETE - Завершилась загрузка из Хадуп в STAGE</li>
+    <li>STAGE_FAIL - Ошибка загрузки в STAGE из Хадуп</li>
+    <li>SAS_PROCESSING - Началась загрузка из STAGE CRM в МА</li>
+    <li>SAS_COMPLETE - Завершилась загрузка из STAGE CRM в МА</li>
+    <li>SAS_FAIL - Ошибка загрузки из STAGE CRM в МА</li>
+</ul>
+
+{% if stat %}
+<h2> 
+{{stat.data_name}}
+</h2>
+
+{{stat.data_table}}
+{% endif %}
+
+{% endblock %}
