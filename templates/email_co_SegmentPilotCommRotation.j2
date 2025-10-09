@@ -1,0 +1,68 @@
+{% extends "email_base.j2" %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<h1>ETL - мониторинг:</h1>
+
+<h2>{{event}}</h2>
+
+{% if data %}
+{% for row in data %}
+
+{% if row.status.strip() == "STAGE_PROCESSING"  %}
+    <h2> Началась загрузка сегмента PILOT_COMM_ROTATION из Хадуп в STAGE CRM (P4MS) </h2>
+{% elif row.status.strip() == "STAGE_COMPLETE" %}
+    <h2> Завершилась загрузка сегмента PILOT_COMM_ROTATION из Хадуп в STAGE CRM (P4MS) </h2>
+{% elif row.status.strip() == "SAS_PROCESSING" %}
+    <h2> Началась загрузка сегмента PILOT_COMM_ROTATION из STAGE CRM (P4MS) в МА (P1MS) </h2>
+{% elif row.status.strip() == "SAS_COMPLETE" %}
+    <h2> Завершилась загрузка сегмента PILOT_COMM_ROTATION из STAGE CRM (P4MS) в МА (P1MS) </h2>
+{% elif row.status.strip() in ["STAGE_FAIL", "SAS_FAIL"] %}
+    <h2> Загрузка сегмента PILOT_COMM_ROTATION завершилась с ошибкой </h2>
+{% else %}
+    <h2>Что-то не так в шаблоне! Статус = {{row.status}} </h2>
+{% endif %}
+
+<table>
+    <tr><th>f_id </th><td> {{row.f_id}} </td></tr>
+    <tr><th>dt </th><td> {{row.dt}} </td></tr>
+    <tr><th>dttm </th><td> {{row.dttm}} </td></tr>
+    <tr><th>project</th><td> {{row.project}} </td></tr>
+    <tr><th>status</th><td> {{row.status}} </td></tr>
+    <tr><th>description</th><td> {{row.description}} </td></tr>
+    <tr><th>load_type </th><td> {{row.load_type}} </td></tr>
+    <tr><th>CDTTM </th><td> {{row.cdttm}} </td></tr>
+</table>
+  
+{% endfor %}
+{% endif %}
+
+
+<h2> Описание статусов </h2>
+<ul>
+    <li>STAGE_PROCESSING - Началась загрузка из Хадуп в STAGE CRM</li>
+    <li>STAGE_COMPLETE - Завершилась загрузка из Хадуп в STAGE</li>
+    <li>STAGE_FAIL - Ошибка загрузки в STAGE из Хадуп</li>
+    <li>SAS_PROCESSING - Началась загрузка из STAGE CRM в МА</li>
+    <li>SAS_COMPLETE - Завершилась загрузка из STAGE CRM в МА</li>
+    <li>SAS_FAIL - Ошибка загрузки из STAGE CRM в МА</li>
+</ul>
+
+{% if stat %}
+{% for row in stat %}
+
+    {% if row.data_status %}
+        <h2 id="{{row.data_status}}"> {{row.data_name}}</h2>
+    {% else %}
+        <h2> {{row.data_name}}</h2>
+    {% endif %}
+
+    {{row.data_table}}
+
+{% endfor %}
+{% endif %}
+
+
+
+{% endblock %}

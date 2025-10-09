@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% block head %}
+<title>{% block title %}{% endblock %}</title>
+<style>
+    h1 {
+        font-family: Calibri, 'Trebuchet MS', sans-serif;;
+        font-size: small;
+    }
+    h2 {
+        font-family: Calibri, 'Trebuchet MS', sans-serif;;
+        font-size: x-small;
+        color: green;
+    }
+    p {
+        font-family: Calibri, 'Trebuchet MS', sans-serif;;
+        font-size: x-small;
+    }
+    table, li {
+        font-family: Calibri, 'Trebuchet MS', sans-serif;
+        font-size: x-small;
+        border-collapse: collapse;
+    }
+
+    td, th {
+        border: 1px solid #ddd;
+        padding: 3px;
+    }
+    th {
+        padding-top: 5px;
+        padding-bottom: 5px;
+        text-align: left;
+    }
+    #inprogress {
+         color: #cc9900;
+    }
+    #sucsess {
+        color: green;
+    }
+    #error {
+        color: red;
+    }
+    #failure {
+        color: red;
+    }
+    #stat_report td {
+        border: 1px solid #ddd;
+        padding: 4px;
+        text-align: right;
+    }
+    #stat_report th {
+        border: 1px solid #ddd;
+        padding: 4px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+        text-align: center;
+        background: lightblue;
+    }
+    #footer {
+        font-family: Calibri, 'Trebuchet MS', sans-serif;
+        font-size: 0.75em;
+    }
+    #footer a:link, a:visited {
+        text-decoration: none;
+        color: black;
+    }
+    #footer a:hover, a:active {
+        text-decoration: underline;
+        color: hot-pink;
+    }
+</style>
+{% endblock %}
+</head>
+
+<body>
+
+<div id="content">{% block content %}{% endblock %}</div>
+
+<div id="footer">
+{% block footer %}
+<br>
+<hr>
+<a href="https://confluence.int.gazprombank.ru/pages/viewpage.action?pageId=1197660666">описание проекта</a>
+{% endblock %}
+</div>
+
+</body>
+
+</html>

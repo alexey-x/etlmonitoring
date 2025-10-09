@@ -1,0 +1,83 @@
+{% extends "email_base.j2" %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<h1>ETL - мониторинг:</h1>
+
+<h2>{{event}}</h2>
+
+{% if data %}
+{% for row in data %}
+
+{% if row.project.strip() == "MO_MONTHLY_ALTER"  %}
+    <h2> Загрузка альтернативных скоров </h2>
+{% elif row.project.strip() == "MO_MONTHLY" %}
+    <h2> Загрузка скоров </h2>
+{% elif row.project.strip() == "MO_LTV" %}
+    <h2> Загрузка LTV </h2>
+{% else %}
+    <h2>Что-то не так в шаблоне! </h2>
+{% endif %}
+
+<table>
+    <tr><th>f_id </th><td> {{row.f_id}} </td></tr>
+    <tr><th>dt </th><td> {{row.dt}} </td></tr>
+    <tr><th>dttm </th><td> {{row.dttm}} </td></tr>
+    <tr><th>project</th><td> {{row.project}} </td></tr>
+    <tr><th>status</th><td> {{row.status}} </td></tr>
+    <tr><th>description</th><td> {{row.description}} </td></tr>
+    <tr><th>load_type </th><td> {{row.load_type}} </td></tr>
+    <tr><th>CDTTM </th><td> {{row.cdttm}} </td></tr>
+</table>
+  
+{% endfor %}
+{% endif %}
+
+
+<h2> Описание статусов </h2>
+<ul>
+    <li>STAGE_PROCESSING - DF стартовал загрузку в STAGE</li>
+    <li>STAGE_COMPLETE - DF успешно завершил загрузку в STAGE</li>
+    <li>STAGE_FAIL - ошибка загрузки в STAGE из DF</li>
+    <li>SAS_PROCESSING - стартовала загрузка из STAGE в МО</li>
+    <li>SAS_COMPLETE - успешно завершилась загрузка из STAGE в МО</li>
+    <li>SAS_FAIL - ошибка загрузки из STAGE в МО</li>
+</ul>
+
+<h2> Расписание </h2>
+
+<table id="stat_report">
+    <tr>
+        <th></th>
+        <th>Скорры</th>
+        <th>Альт. Скорры</th>
+        <th>LTV</th>
+    </tr>
+    <tr>
+        <th>из DF в STAGE </th>
+        <td>12:00, 17:00</td>
+        <td>8:00, 13:00, 17:00, 20:00</td>
+        <td>9:00, 14:00, 17:00</td>
+    </tr>
+    <tr>
+        <th>из STAGE в МО</th>
+        <td>15:00, 20:00</td>
+        <td>10:00, 15:00, 19:00, 22:00</td>
+        <td>11:00, 16:00, 19:00</td>
+    </tr>
+</table>
+
+{% if stat %}
+{% for row in stat %}
+
+<h2> {{row.data_name}}</h2>
+
+    {{row.data_table}}
+
+{% endfor %}
+{% endif %}
+
+
+
+{% endblock %}

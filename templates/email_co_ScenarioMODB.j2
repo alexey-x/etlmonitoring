@@ -1,0 +1,43 @@
+{% extends "email_base.j2" %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<h1>ETL - мониторинг:</h1>
+
+<h2>{{event}}</h2>
+
+{% if data %}
+{% for row in data %}
+<table>
+    <tr><th> scenario_id </th><td> {{row.scenario_id}} </td></tr>
+    <tr><th> scenario_nm </th><td> {{row.scenario_nm}} </td></tr>
+    <tr><th> scenario_desc </th><td> {{row.scenario_desc}} </td></tr>
+    <tr><th> scenario_period_dd </th><td> {{row.scenario_period_dd}} </td></tr>
+    <tr><th> scenario_goal </th><td> {{row.scenario_goal}} </td></tr>
+    <tr><th> status</th><td> {{row.status}} </td></tr>
+    <tr><th> created_by </th><td> {{row.created_by}} </td></tr>
+    <tr><th> created_dttm </th><td> {{row.created_dttm}} </td></tr>
+    <tr><th> scenario_period_start_dt </th><td> {{row.scenario_period_start_dt}} </td></tr>
+    <tr><th> delay_days </th><td> {{row.delay_days}} </td></tr>
+    <tr><th> start_period_dttm </th><td> {{row.start_period_dttm}} </td></tr>
+    <tr><th> end_period_dttm </th><td> {{row.end_period_dttm}} </td></tr>
+    <tr><th> is_using_alter_score_ind </th><td> {{row.is_using_alter_score_ind}} </td></tr>
+    <tr><th> size_pct </th><td> {{row.size_pct}} </td></tr>
+    <tr><th> algo </th><td> {{row.algo}} </td></tr>
+    <tr><th> algo_pct </th><td> {{row.algo_pct}} </td></tr>
+    <tr><th> customer_pct </th><td> {{row.customer_pct}} </td></tr>
+    <tr><th> alter_score_source </th><td> {{row.alter_score_source}} </td></tr>
+</table>
+{% endfor %}
+{% endif %}
+
+{% if stat %}
+<h2> 
+{{stat.data_name}}
+</h2>
+
+{{stat.data_table}}
+{% endif %}
+
+{% endblock %}

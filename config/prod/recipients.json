@@ -1,0 +1,10 @@
+{
+    "xxx@a.ru": {
+        "active": true, 
+        "role": "admin"
+    },
+    "yyy@a.ru": {
+        "active": true, 
+        "role": "user"
+    }
+}
